@@ -1,0 +1,50 @@
+version: '3.5'
+
+services:
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.2
+    container_name: frankfurter_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.monitoring.enabled=true
+      - xpack.watcher.enabled=false
+      - xpack.security.enabled=true
+      - xpack.security.audit.enabled=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - ELASTIC_PASSWORD=mysecretpassword
+      - logger.level=INFO
+    ports:
+      - "9200:9200"
+    restart: always
+    volumes:
+      - frankfurter_data:/usr/share/elasticsearch/data/elasticsearch
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.9.2
+    container_name: frankfurter_kibana
+    environment:
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=mysecretpassword
+    ports:
+      - "5601:5601"
+    restart: always
+    depends_on:
+      - elasticsearch
+
+  cache:
+    image: redis:6.2-alpine
+    container_name: frankfurter_redis
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass mysecretpassword
+    volumes:
+      - frankfurter_data:/data/redis
+
+volumes:
+  frankfurter_data:
+
+networks:
+  default:
+    name: frankfurter

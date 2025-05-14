@@ -1,0 +1,6 @@
+@FrankfurterApp_HostAddress = http://localhost:5216
+
+GET {{FrankfurterApp_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
